@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CardionView">
+        <attr name="parent_text" format="string"/>
+        <attr name="child_text" format="string"/>
+        <attr name="parent_font_size" format="dimension"/>
+        <attr name="child_font_size" format="dimension"/>
+        <attr name="parent_background_color" format="color"/>
+        <attr name="child_background_color" format="color"/>
+        <attr name="parent_border_radius" format="dimension"/>
+        <attr name="child_border_radius" format="dimension"/>
+        <attr name="animation_duration" format="integer"/>
+    </declare-styleable>
+</resources>
