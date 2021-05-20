@@ -3,14 +3,23 @@ package ivan.projects.expandablelayout
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.text.PrecomputedTextCompat
 import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.TextViewCompat
 import ivan.projects.expandablelayout.databinding.CardionViewLayoutBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 class CardionView @JvmOverloads constructor(
     context: Context,
@@ -160,5 +169,38 @@ class CardionView @JvmOverloads constructor(
             MeasureSpec.makeMeasureSpec(80000, MeasureSpec.UNSPECIFIED)
         )
         secondLayoutHeight = cardionViewLayoutBinding.secondTextView.measuredHeight
+        getChildTextLineCount {
+            secondLayoutHeight *= it
+        }
+    //secondLayoutHeight = measureTextHeight(this.childText)
+    }
+//    private fun measureTextHeight(text : String): Int {
+//        getChildTextLineCount { Log.d(TAG, "measureTextHeight: $it") }
+//        val paint = Paint()
+//        val bounds = Rect()
+//
+//        var textHeight : Int = 0
+//        paint.textSize = this.childFontSize * context.resources.displayMetrics.scaledDensity
+//
+//        paint.getTextBounds(text, 0, text.length, bounds)
+//        return (2 * bounds.height() + childPadding * 2 * context.resources.displayMetrics.density + getLineSpacing() * 2).toInt()
+//    }
+    fun getLineSpacing(): Int {
+        val fontMetrics : Paint.FontMetricsInt = cardionViewLayoutBinding.secondTextView.paint.fontMetricsInt
+        return fontMetrics.ascent - fontMetrics.top
+    }
+    private fun getChildTextLineCount(lineCount : (Int) -> (Unit)){
+        val params : PrecomputedTextCompat.Params = TextViewCompat.getTextMetricsParams(cardionViewLayoutBinding.secondTextView)
+        val ref : WeakReference<TextView>? = WeakReference(cardionViewLayoutBinding.secondTextView)
+
+        GlobalScope.launch(Dispatchers.Default) {
+            val text = PrecomputedTextCompat.create(childText, params)
+            GlobalScope.launch (Dispatchers.Main){
+                ref?.get()?.let{
+                        textView ->TextViewCompat.setPrecomputedText(textView, text)
+                        lineCount.invoke(textView.lineCount)
+                }
+            }
+        }
     }
 }

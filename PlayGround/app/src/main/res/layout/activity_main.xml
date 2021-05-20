@@ -8,12 +8,12 @@
     tools:context=".MainActivity"
     android:orientation="horizontal">
     <ivan.projects.expandablelayout.CardionView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:parent_padding="16dp"
         app:child_font_size="30sp"
         android:id="@+id/just_id"
-        app:parent_text="parent text"
-        app:child_text="child text"
+        app:parent_text="parent text akfjnewuoivhewiuvneiuwv eoivnweiovnewovnvweonvoiwevniovwenviownvoivnutirbiorbnvreotbn parent text "
+        app:child_text="child text check it"
         app:animation_duration="3000"/>
 </LinearLayout>
