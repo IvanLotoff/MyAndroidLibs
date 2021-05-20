@@ -11,47 +11,14 @@ import android.widget.LinearLayout
 import androidx.core.view.updateLayoutParams
 import ivan.projects.expandablelayout.databinding.CardionViewLayoutBinding
 
-class CardionView : LinearLayout {
-    constructor(context: Context, attributeSet: AttributeSet?) : this(context, attributeSet, 0) {
-
-    }
-    constructor(context: Context, attributeSet: AttributeSet? = null, defStyle: Int = 0) : super(
-        context,
-        attributeSet,
-        defStyle) {
-        Log.d(TAG, ": ")
-        this.cardionViewLayoutBinding =
-            CardionViewLayoutBinding.inflate(LayoutInflater.from(context), null, false)
-        if (attributeSet != null) {
-            val typedArray = context.obtainStyledAttributes(
-                attributeSet,
-                R.styleable.CardionView,
-                defStyle,
-                0)
-            try {
-                Log.d(TAG, "within: ")
-                parentText = typedArray.getString(R.styleable.CardionView_parent_text) ?: ""
-                childText = typedArray.getString(R.styleable.CardionView_child_text) ?: ""
-                parentFontSize = typedArray.getFloat(R.styleable.CardionView_parent_font_size, 12f)
-                childFontSize = typedArray.getFloat(R.styleable.CardionView_child_font_size, 12f)
-                parentBackgroundColor =
-                    typedArray.getColor(R.styleable.CardionView_parent_background_color, Color.BLUE)
-                childBackgroundColor =
-                    typedArray.getColor(R.styleable.CardionView_child_background_color, Color.GREEN)
-                animationDuration =
-                    typedArray.getInteger(R.styleable.CardionView_animation_duration, 200)
-                outerLayoutParams = LayoutParams(context, attributeSet)
-            } finally {
-                typedArray.recycle()
-            }
-        }
-        cardionViewLayoutBinding.secondTextView.measure(
-            MeasureSpec.makeMeasureSpec(80000, MeasureSpec.UNSPECIFIED),
-            MeasureSpec.makeMeasureSpec(80000, MeasureSpec.UNSPECIFIED)
-        )
-        secondLayoutHeight = cardionViewLayoutBinding.secondTextView.measuredHeight
-        LayoutInflater.from(context)
-    }
+class CardionView @JvmOverloads constructor(
+    context: Context,
+    attributeSet: AttributeSet? = null,
+    defStyle: Int = 0
+) : LinearLayout(
+    context,
+    attributeSet,
+    defStyle) {
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -75,7 +42,7 @@ class CardionView : LinearLayout {
      * A property to hold text that will be initially displayed upper than
      * appearing text
      */
-    private var parentText: String = ""
+    var parentText: String = ""
         set(value) {
             field = value
             cardionViewLayoutBinding.parentTextView.text = value
@@ -84,40 +51,41 @@ class CardionView : LinearLayout {
     /**
      * A property to hold text that will be shown after dropping down
      */
-    private var childText: String = ""
+    var childText: String = ""
         set(value) {
             field = value
             cardionViewLayoutBinding.secondTextView.text = value
         }
 
     @Sp
-    private var parentFontSize: Float = 12f
+    var parentFontSize: Float = 12f
         set(value) {
             field = value
             cardionViewLayoutBinding.parentTextView.textSize = value
         }
 
     @Sp
-    private var childFontSize: Float = 12f
+    var childFontSize: Float = 12f
         set(value) {
             field = value
             cardionViewLayoutBinding.secondTextView.textSize = value
         }
-    private var parentBackgroundColor: Int = Color.BLUE
+    var parentBackgroundColor: Int = Color.BLUE
         set(value) {
             field = value
             cardionViewLayoutBinding.frameId.setBackgroundColor(value)
         }
-    private var childBackgroundColor: Int = Color.GREEN
+    var childBackgroundColor: Int = Color.GREEN
         set(value) {
             field = value
             cardionViewLayoutBinding.secondTextView.setBackgroundColor(value)
         }
 
     @Milliseconds
-    private var animationDuration: Int = 200
+    var animationDuration: Int = 200
 
-    private val cardionViewLayoutBinding: CardionViewLayoutBinding
+    val cardionViewLayoutBinding: CardionViewLayoutBinding =
+        CardionViewLayoutBinding.inflate(LayoutInflater.from(context), null, false)
     private var secondLayoutHeight = 0
 
     private var isExpanded = false
@@ -150,5 +118,35 @@ class CardionView : LinearLayout {
     }
     companion object{
         const val TAG = "Tagging"
+    }
+
+    init {
+        if (attributeSet != null) {
+            val typedArray = context.obtainStyledAttributes(
+                attributeSet,
+                R.styleable.CardionView,
+                defStyle,
+                0)
+            try {
+                parentText = typedArray.getString(R.styleable.CardionView_parent_text) ?: ""
+                childText = typedArray.getString(R.styleable.CardionView_child_text) ?: ""
+                parentFontSize = typedArray.getFloat(R.styleable.CardionView_parent_font_size, 12f)
+                childFontSize = typedArray.getFloat(R.styleable.CardionView_child_font_size, 12f)
+                parentBackgroundColor =
+                    typedArray.getColor(R.styleable.CardionView_parent_background_color, Color.BLUE)
+                childBackgroundColor =
+                    typedArray.getColor(R.styleable.CardionView_child_background_color, Color.GREEN)
+                animationDuration =
+                    typedArray.getInteger(R.styleable.CardionView_animation_duration, 200)
+                outerLayoutParams = LayoutParams(context, attributeSet)
+            } finally {
+                typedArray.recycle()
+            }
+        }
+        cardionViewLayoutBinding.secondTextView.measure(
+            MeasureSpec.makeMeasureSpec(80000, MeasureSpec.UNSPECIFIED),
+            MeasureSpec.makeMeasureSpec(80000, MeasureSpec.UNSPECIFIED)
+        )
+        secondLayoutHeight = cardionViewLayoutBinding.secondTextView.measuredHeight
     }
 }
