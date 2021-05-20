@@ -33,4 +33,12 @@ class CardionViewExtentions {
     fun CardionView.setParentBorderRadius(duration : Int){
         this.animationDuration = duration
     }
+    @BindingAdapter(value = ["parent_padding"])
+    fun CardionView.setParentPadding(padding : Float){
+        this.parentPadding = padding
+    }
+    @BindingAdapter(value = ["child_padding"])
+    fun CardionView.setChildPadding(padding : Float){
+        this.childPadding = padding
+    }
 }

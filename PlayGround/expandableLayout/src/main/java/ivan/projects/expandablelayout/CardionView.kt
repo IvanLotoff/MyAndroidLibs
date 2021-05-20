@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import ivan.projects.expandablelayout.databinding.CardionViewLayoutBinding
 
@@ -83,7 +84,16 @@ class CardionView @JvmOverloads constructor(
 
     @Milliseconds
     var animationDuration: Int = 200
-
+    var parentPadding : Float = 0f
+        set(value){
+            field = value
+            cardionViewLayoutBinding.parentTextView.setPadding(value.toInt())
+        }
+    var childPadding : Float = 0f
+        set(value) {
+            field = value
+            cardionViewLayoutBinding.secondTextView.setPadding(value.toInt())
+        }
     val cardionViewLayoutBinding: CardionViewLayoutBinding =
         CardionViewLayoutBinding.inflate(LayoutInflater.from(context), null, false)
     private var secondLayoutHeight = 0
@@ -130,8 +140,8 @@ class CardionView @JvmOverloads constructor(
             try {
                 parentText = typedArray.getString(R.styleable.CardionView_parent_text) ?: ""
                 childText = typedArray.getString(R.styleable.CardionView_child_text) ?: ""
-                parentFontSize = typedArray.getFloat(R.styleable.CardionView_parent_font_size, 12f)
-                childFontSize = typedArray.getFloat(R.styleable.CardionView_child_font_size, 12f)
+                parentFontSize = typedArray.getDimension(R.styleable.CardionView_parent_font_size, 12f)
+                childFontSize = typedArray.getDimension(R.styleable.CardionView_child_font_size, 12f)
                 parentBackgroundColor =
                     typedArray.getColor(R.styleable.CardionView_parent_background_color, Color.BLUE)
                 childBackgroundColor =
@@ -139,6 +149,8 @@ class CardionView @JvmOverloads constructor(
                 animationDuration =
                     typedArray.getInteger(R.styleable.CardionView_animation_duration, 200)
                 outerLayoutParams = LayoutParams(context, attributeSet)
+                parentPadding = typedArray.getDimension(R.styleable.CardionView_parent_padding, 0f)
+                childPadding = typedArray.getDimension(R.styleable.CardionView_child_padding, 0f)
             } finally {
                 typedArray.recycle()
             }
