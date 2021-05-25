@@ -22,6 +22,7 @@ import androidx.core.view.updateLayoutParams
 import ivan.projects.expandablelayout.databinding.ChildWrapperBinding
 import ivan.projects.expandablelayout.databinding.MainLayoutBinding
 
+@Deprecated(message = "dont use it")
 open class ExpandableLayout @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,

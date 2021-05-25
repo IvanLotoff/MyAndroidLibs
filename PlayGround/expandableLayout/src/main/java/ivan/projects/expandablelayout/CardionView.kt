@@ -8,14 +8,17 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.PrecomputedTextCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.TextViewCompat
 import ivan.projects.expandablelayout.databinding.CardionViewLayoutBinding
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -44,9 +47,21 @@ class CardionView @JvmOverloads constructor(
         }
         // повернем стрелку на 90 градусов
         cardionViewLayoutBinding.spinnerId.rotation = 90f
-        Log.d(TAG, "onFinishInflate: " + (this.layoutParams != null))
         this.addView(cardionViewLayoutBinding.root, outerLayoutParams)
     }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        Log.d(TAG, "onMeasure: width type " + MeasureSpec.getMode(width))
+        Log.d(TAG, "onMeasure: width size = " + MeasureSpec.getSize(width))
+
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        Log.d(TAG, "onSizeChanged: w = $w, h = $h, oldw = $oldw, oldh = $oldh")
+    }
+    private var realWidth : Int = 0
     private lateinit var outerLayoutParams : ViewGroup.LayoutParams
     /**
      * A property to hold text that will be initially displayed upper than
@@ -56,6 +71,7 @@ class CardionView @JvmOverloads constructor(
         set(value) {
             field = value
             cardionViewLayoutBinding.parentTextView.text = value
+            cardionViewLayoutBinding.parentTextView.requestLayout()
         }
 
     /**
@@ -65,6 +81,7 @@ class CardionView @JvmOverloads constructor(
         set(value) {
             field = value
             cardionViewLayoutBinding.secondTextView.text = value
+            invalidateSecondLayoutHeight()
         }
 
     @Sp
@@ -72,6 +89,7 @@ class CardionView @JvmOverloads constructor(
         set(value) {
             field = value
             cardionViewLayoutBinding.parentTextView.textSize = value
+            cardionViewLayoutBinding.parentTextView.requestLayout()
         }
 
     @Sp
@@ -79,16 +97,19 @@ class CardionView @JvmOverloads constructor(
         set(value) {
             field = value
             cardionViewLayoutBinding.secondTextView.textSize = value
+            invalidateSecondLayoutHeight()
         }
     var parentBackgroundColor: Int = Color.BLUE
         set(value) {
             field = value
             cardionViewLayoutBinding.frameId.setBackgroundColor(value)
+            cardionViewLayoutBinding.frameId.invalidate()
         }
     var childBackgroundColor: Int = Color.GREEN
         set(value) {
             field = value
             cardionViewLayoutBinding.secondTextView.setBackgroundColor(value)
+            cardionViewLayoutBinding.secondTextView.invalidate()
         }
 
     @Milliseconds
@@ -103,7 +124,7 @@ class CardionView @JvmOverloads constructor(
             field = value
             cardionViewLayoutBinding.secondTextView.setPadding(value.toInt())
         }
-    val cardionViewLayoutBinding: CardionViewLayoutBinding =
+    private val cardionViewLayoutBinding: CardionViewLayoutBinding =
         CardionViewLayoutBinding.inflate(LayoutInflater.from(context), null, false)
     private var secondLayoutHeight = 0
 
@@ -164,43 +185,19 @@ class CardionView @JvmOverloads constructor(
                 typedArray.recycle()
             }
         }
+        Log.d(TAG, ": measureWidth = " + cardionViewLayoutBinding.root.measuredWidth)
+        cardionViewLayoutBinding.root.doOnLayout {
+            Log.d(TAG, ":real width  = $width")
+            realWidth = width
+            invalidateSecondLayoutHeight()
+        }
+    }
+
+    private fun invalidateSecondLayoutHeight() {
         cardionViewLayoutBinding.secondTextView.measure(
-            MeasureSpec.makeMeasureSpec(80000, MeasureSpec.UNSPECIFIED),
-            MeasureSpec.makeMeasureSpec(80000, MeasureSpec.UNSPECIFIED)
+                MeasureSpec.makeMeasureSpec(realWidth, MeasureSpec.AT_MOST),
+                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
         )
         secondLayoutHeight = cardionViewLayoutBinding.secondTextView.measuredHeight
-        getChildTextLineCount {
-            secondLayoutHeight *= it
-        }
-    //secondLayoutHeight = measureTextHeight(this.childText)
-    }
-//    private fun measureTextHeight(text : String): Int {
-//        getChildTextLineCount { Log.d(TAG, "measureTextHeight: $it") }
-//        val paint = Paint()
-//        val bounds = Rect()
-//
-//        var textHeight : Int = 0
-//        paint.textSize = this.childFontSize * context.resources.displayMetrics.scaledDensity
-//
-//        paint.getTextBounds(text, 0, text.length, bounds)
-//        return (2 * bounds.height() + childPadding * 2 * context.resources.displayMetrics.density + getLineSpacing() * 2).toInt()
-//    }
-    fun getLineSpacing(): Int {
-        val fontMetrics : Paint.FontMetricsInt = cardionViewLayoutBinding.secondTextView.paint.fontMetricsInt
-        return fontMetrics.ascent - fontMetrics.top
-    }
-    private fun getChildTextLineCount(lineCount : (Int) -> (Unit)){
-        val params : PrecomputedTextCompat.Params = TextViewCompat.getTextMetricsParams(cardionViewLayoutBinding.secondTextView)
-        val ref : WeakReference<TextView>? = WeakReference(cardionViewLayoutBinding.secondTextView)
-
-        GlobalScope.launch(Dispatchers.Default) {
-            val text = PrecomputedTextCompat.create(childText, params)
-            GlobalScope.launch (Dispatchers.Main){
-                ref?.get()?.let{
-                        textView ->TextViewCompat.setPrecomputedText(textView, text)
-                        lineCount.invoke(textView.lineCount)
-                }
-            }
-        }
     }
 }
