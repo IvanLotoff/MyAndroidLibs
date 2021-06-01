@@ -33,7 +33,7 @@ fun <ITEM> createSwipeToDeleteCallbackWithSnackBar(adapter : RecyclerView.Adapte
                 items.add(pos, item)
                 adapter.notifyItemInserted(pos)
 
-                //dapter.notifyDataSetChanged()
+                //adapter.notifyDataSetChanged()
                 //adapter.notifyItemRangeInserted(pos, 1)
             }.show()
 

@@ -8,7 +8,7 @@ import ivan.projects.recyclerviewutils.adapters.general.GeneralSimpleAdapterWith
 
 class RecyclerViewBuilder<MODEL, DTO> private constructor(){
     companion object {
-        fun <MODEL, DTO> build(block: RecyclerViewBuilder<MODEL, DTO>.() -> Unit) =
+        fun <MODEL, DTO> build(/*@LayoutRes layoutRes: Int, */block: RecyclerViewBuilder<MODEL, DTO>.() -> Unit) =
             RecyclerViewBuilder<MODEL, DTO>().apply(block).build()
     }
 
@@ -18,7 +18,7 @@ class RecyclerViewBuilder<MODEL, DTO> private constructor(){
     /**
      * Лучшее место для инициализации view с помощью findViewById
      */
-    var onInitViewHolder : ((View, DTO)-> Unit)? = null // nullable lambda
+    var onInitViewHolder : ((View) -> DTO)? = null // nullable lambda
     var onBindViewHolderWithDTO : ((View, MODEL, DTO) -> Unit)? = null
     var onBindViewHolderWithoutDTO : ((View, MODEL) -> Unit)? = null
 
@@ -30,7 +30,6 @@ class RecyclerViewBuilder<MODEL, DTO> private constructor(){
                 items!!,
                 onBindViewHolderWithoutDTO!!)
         return GeneralSimpleAdapterWithInitCallback<MODEL, DTO>(layoutRes,
-            items!!,
-            dto!!, onInitViewHolder!!, onBindViewHolderWithDTO!!)
+            items!!, onInitViewHolder!!, onBindViewHolderWithDTO!!)
     }
 }

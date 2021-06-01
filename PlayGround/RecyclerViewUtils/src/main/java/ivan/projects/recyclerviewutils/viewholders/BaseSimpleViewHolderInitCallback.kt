@@ -10,11 +10,10 @@ import ivan.projects.recyclerviewutils.interfaces.IOnBind
  * (такие как TextView), в initCallback-e они единажды извлекаются в конструкторе
  * и далее переиспользутся
  */
-abstract class BaseSimpleViewHolderInitCallback<E, DTO>(view: View,
-                                                        protected val dto: DTO,
-                                                        private val initCallback :(View, DTO) -> Unit)
-    : RecyclerView.ViewHolder(view), IOnBind<E> {
-    init{
-        initCallback(view, dto)
-    }
+abstract class BaseSimpleViewHolderInitCallback<E, DTO>(
+  view: View,
+  private val initCallback: (View) -> DTO
+) : RecyclerView.ViewHolder(view), IOnBind<E> {
+
+    protected val dto: DTO = initCallback(view)
 }

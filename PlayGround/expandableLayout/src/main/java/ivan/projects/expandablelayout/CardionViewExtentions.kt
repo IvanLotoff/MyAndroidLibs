@@ -1,5 +1,6 @@
 package ivan.projects.expandablelayout
 
+import android.graphics.drawable.ColorDrawable
 import androidx.databinding.BindingAdapter
 
 class CardionViewExtentions {
@@ -22,7 +23,7 @@ class CardionViewExtentions {
     }
     @BindingAdapter(value = ["parent_background_color"])
     fun CardionView.setParentBackgroundColor(color : Int){
-        this.parentBackgroundColor = color
+        this.parentBackground = ColorDrawable(color)
     }
 
     @BindingAdapter(value = ["child_background_color"])
