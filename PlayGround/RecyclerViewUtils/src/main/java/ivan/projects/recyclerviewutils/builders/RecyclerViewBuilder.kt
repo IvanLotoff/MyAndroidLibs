@@ -22,7 +22,7 @@ class RecyclerViewBuilder<MODEL, DTO> private constructor(){
     var onBindViewHolderWithDTO : ((View, MODEL, DTO) -> Unit)? = null
     var onBindViewHolderWithoutDTO : ((View, MODEL) -> Unit)? = null
 
-    fun build(): RecyclerView.Adapter<*> {
+    private fun build(): RecyclerView.Adapter<*> {
         if(layoutRes == 0)
             throw IllegalArgumentException("layoutRes must be set")
         if(dto == null && onInitViewHolder == null)

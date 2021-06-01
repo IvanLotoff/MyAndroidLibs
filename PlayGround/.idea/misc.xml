@@ -5,6 +5,7 @@
       <map>
         <entry key="../../../../../../../layout/custom_preview.xml" value="0.1" />
         <entry key="../../../../layout/custom_preview.xml" value="0.1" />
+        <entry key="RecyclerViewUtils/src/main/res/xml/zoom_in.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1381340579710145" />
         <entry key="app/src/main/res/layout/item.xml" value="0.10416666666666667" />
         <entry key="app/src/main/res/layout/item_person.xml" value="0.1721014492753623" />
