@@ -9,8 +9,7 @@ import ivan.projects.recyclerviewutils.viewholders.BaseSimpleViewHolderInitCallb
 
 open class GeneralSimpleAdapterWithInitCallback<T, DTO>(@LayoutRes private val layoutId: Int,
                                                         items: List<T>,
-                                                        private val dto : DTO,
-                                                        private val initCallback : (View, DTO)-> Unit,
+                                                        private val initCallback : (View) -> DTO,
                                                         private val onBindLambda: (View, T, DTO) -> Unit)
     : BaseSimpleAdapterInitCallback<T, DTO>(items) {
 
@@ -21,7 +20,6 @@ open class GeneralSimpleAdapterWithInitCallback<T, DTO>(@LayoutRes private val l
 
         return object : BaseSimpleViewHolderInitCallback<T, DTO>(
             LayoutInflater.from(parent.context).inflate(layoutId, parent,false),
-            dto,
             initCallback
         ) {
             override fun onBind(item: T) {

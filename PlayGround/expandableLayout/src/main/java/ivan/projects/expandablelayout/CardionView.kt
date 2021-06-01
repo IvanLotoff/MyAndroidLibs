@@ -1,28 +1,19 @@
 package ivan.projects.expandablelayout
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.core.text.PrecomputedTextCompat
-import androidx.core.view.doOnLayout
 import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
-import androidx.core.widget.TextViewCompat
 import ivan.projects.expandablelayout.databinding.CardionViewLayoutBinding
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 
 class CardionView @JvmOverloads constructor(
     context: Context,
@@ -32,23 +23,6 @@ class CardionView @JvmOverloads constructor(
     context,
     attributeSet,
     defStyle) {
-
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        // изначально всё свёрнуто
-        cardionViewLayoutBinding.secondTextView.updateLayoutParams {
-            height = 0
-        }
-        cardionViewLayoutBinding.frameId.setOnClickListener {
-            if (this.isExpanded)
-                this.collapse()
-            else
-                this.expand()
-        }
-        // повернем стрелку на 90 градусов
-        cardionViewLayoutBinding.spinnerId.rotation = 90f
-        this.addView(cardionViewLayoutBinding.root, outerLayoutParams)
-    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -60,9 +34,11 @@ class CardionView @JvmOverloads constructor(
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         Log.d(TAG, "onSizeChanged: w = $w, h = $h, oldw = $oldw, oldh = $oldh")
+        if (oldw != w) {
+            Log.d(TAG, ":real width  = $width")
+            invalidateSecondLayoutHeight()
+        }
     }
-    private var realWidth : Int = 0
-    private lateinit var outerLayoutParams : ViewGroup.LayoutParams
     /**
      * A property to hold text that will be initially displayed upper than
      * appearing text
@@ -71,7 +47,6 @@ class CardionView @JvmOverloads constructor(
         set(value) {
             field = value
             cardionViewLayoutBinding.parentTextView.text = value
-            cardionViewLayoutBinding.parentTextView.requestLayout()
         }
 
     /**
@@ -89,7 +64,6 @@ class CardionView @JvmOverloads constructor(
         set(value) {
             field = value
             cardionViewLayoutBinding.parentTextView.textSize = value
-            cardionViewLayoutBinding.parentTextView.requestLayout()
         }
 
     @Sp
@@ -99,17 +73,13 @@ class CardionView @JvmOverloads constructor(
             cardionViewLayoutBinding.secondTextView.textSize = value
             invalidateSecondLayoutHeight()
         }
-    var parentBackgroundColor: Int = Color.BLUE
-        set(value) {
-            field = value
-            cardionViewLayoutBinding.frameId.setBackgroundColor(value)
-            cardionViewLayoutBinding.frameId.invalidate()
-        }
-    var childBackgroundColor: Int = Color.GREEN
+    var parentBackground: Drawable?
+        get() = cardionViewLayoutBinding.frameId.background
+        set(value) { cardionViewLayoutBinding.frameId.background = value }
+    var childBackgroundColor: Int = Color.GREEN // TODO
         set(value) {
             field = value
             cardionViewLayoutBinding.secondTextView.setBackgroundColor(value)
-            cardionViewLayoutBinding.secondTextView.invalidate()
         }
 
     @Milliseconds
@@ -125,13 +95,29 @@ class CardionView @JvmOverloads constructor(
             cardionViewLayoutBinding.secondTextView.setPadding(value.toInt())
         }
     private val cardionViewLayoutBinding: CardionViewLayoutBinding =
-        CardionViewLayoutBinding.inflate(LayoutInflater.from(context), null, false)
+        CardionViewLayoutBinding.inflate(LayoutInflater.from(context), this, true)
+    init {
+        // изначально всё свёрнуто
+        cardionViewLayoutBinding.secondTextView.updateLayoutParams {
+            height = 0
+        }
+        cardionViewLayoutBinding.frameId.setOnClickListener {
+            if (this.isExpanded)
+                this.collapse()
+            else
+                this.expand()
+        }
+        // повернем стрелку на 90 градусов
+        cardionViewLayoutBinding.spinnerId.rotation = 90f
+    }
+
     private var secondLayoutHeight = 0
 
     private var isExpanded = false
     private fun expand() {
         isExpanded = true
         ValueAnimator.ofFloat(0f, 1f).apply {
+//            interpolator = AccelerateDecelerateInterpolator()
             duration = animationDuration.toLong()
             addUpdateListener {
                 val animValue = it.animatedValue as Float
@@ -161,41 +147,29 @@ class CardionView @JvmOverloads constructor(
     }
 
     init {
-        if (attributeSet != null) {
-            val typedArray = context.obtainStyledAttributes(
-                attributeSet,
-                R.styleable.CardionView,
-                defStyle,
-                0)
-            try {
-                parentText = typedArray.getString(R.styleable.CardionView_parent_text) ?: ""
-                childText = typedArray.getString(R.styleable.CardionView_child_text) ?: ""
-                parentFontSize = typedArray.getDimension(R.styleable.CardionView_parent_font_size, 12f)
-                childFontSize = typedArray.getDimension(R.styleable.CardionView_child_font_size, 12f)
-                parentBackgroundColor =
-                    typedArray.getColor(R.styleable.CardionView_parent_background_color, Color.BLUE)
-                childBackgroundColor =
-                    typedArray.getColor(R.styleable.CardionView_child_background_color, Color.GREEN)
-                animationDuration =
-                    typedArray.getInteger(R.styleable.CardionView_animation_duration, 200)
-                outerLayoutParams = LayoutParams(context, attributeSet)
-                parentPadding = typedArray.getDimension(R.styleable.CardionView_parent_padding, 0f)
-                childPadding = typedArray.getDimension(R.styleable.CardionView_child_padding, 0f)
-            } finally {
-                typedArray.recycle()
-            }
+        val typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.CardionView, defStyle, 0)
+        try {
+            parentText = typedArray.getString(R.styleable.CardionView_parent_text) ?: ""
+            childText = typedArray.getString(R.styleable.CardionView_child_text) ?: ""
+            parentFontSize = typedArray.getDimension(R.styleable.CardionView_parent_font_size, 12f)
+            childFontSize = typedArray.getDimension(R.styleable.CardionView_child_font_size, 12f)
+            parentBackground =
+                typedArray.getDrawable(R.styleable.CardionView_parent_background_color) ?: ColorDrawable(Color.BLUE)
+            childBackgroundColor =
+                typedArray.getColor(R.styleable.CardionView_child_background_color, Color.GREEN)
+            animationDuration =
+                typedArray.getInteger(R.styleable.CardionView_animation_duration, 200)
+            parentPadding = typedArray.getDimension(R.styleable.CardionView_parent_padding, 0f)
+            childPadding = typedArray.getDimension(R.styleable.CardionView_child_padding, 0f)
+        } finally {
+            typedArray.recycle()
         }
         Log.d(TAG, ": measureWidth = " + cardionViewLayoutBinding.root.measuredWidth)
-        cardionViewLayoutBinding.root.doOnLayout {
-            Log.d(TAG, ":real width  = $width")
-            realWidth = width
-            invalidateSecondLayoutHeight()
-        }
     }
 
     private fun invalidateSecondLayoutHeight() {
         cardionViewLayoutBinding.secondTextView.measure(
-                MeasureSpec.makeMeasureSpec(realWidth, MeasureSpec.AT_MOST),
+                MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
                 MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
         )
         secondLayoutHeight = cardionViewLayoutBinding.secondTextView.measuredHeight

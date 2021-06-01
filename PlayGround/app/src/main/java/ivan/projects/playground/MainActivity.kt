@@ -78,15 +78,14 @@ class MainActivity : AppCompatActivity() {
               dto.nameTextView?.text = person.name
             }
             onInitViewHolder = {
-               view : View, dto : Dto ->
+               view : View ->
                 val name = view.findViewById<TextView>(R.id.name_text_view)
                 val phone = view.findViewById<TextView>(R.id.phone_text_view)
                 val button = view.findViewById<Button>(R.id.check_button)
                 button.setOnClickListener {
                     Toast.makeText(this@MainActivity, name.text, Toast.LENGTH_SHORT).show()
                 }
-                dto.nameTextView = name
-                dto.phoneTextView = phone
+                Dto(name, phone)
             }
         }
         recyclerView.adapter = adapter
