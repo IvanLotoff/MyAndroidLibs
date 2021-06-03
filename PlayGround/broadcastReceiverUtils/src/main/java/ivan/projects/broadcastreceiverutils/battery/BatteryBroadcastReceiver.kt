@@ -6,6 +6,11 @@ import android.content.Intent
 import android.util.Log
 
 /**
+ * Данный класс содержит 4 основных callback метода, которые реагируют на
+ * следующие обстоятельства: [onBatteryLow] - батареи менее 15%, [onBatteryOkay] - батареи более 15%
+ * [onPowerConnected] - колбек, который срабатывает при подключении устройства к зарядке
+ * [onPowerDisconnected] - колбек, который срабатвает при отключении устройства от зарядки
+ *
  * Подключение [BatteryBroadcastReceiver] в [Activity]
  *
  * В [MainActivity.onResume] регистрируем [BroadcastReceiver]

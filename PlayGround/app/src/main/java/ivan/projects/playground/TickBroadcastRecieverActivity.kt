@@ -4,20 +4,25 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import ivan.projects.broadcastreceiverutils.battery.BatteryBroadcastReceiver
+import ivan.projects.broadcastreceiverutils.battery.LowerThanXPercentCallback
 import ivan.projects.broadcastreceiverutils.receivers.TickBroadcastReceiver
 
 class TickBroadcastRecieverActivity : AppCompatActivity() {
 
     //private val filter : IntentFilter = IntentFilter(Intent.ACTION_TIME_TICK)
-    private val broadcastReceiver = BatteryBroadcastReceiver()
+    private val broadcastReceiver = LowerThanXPercentCallback(50){
+        _, _, percent ->
+        Toast.makeText(this, "Now battery at percent = $percent", Toast.LENGTH_SHORT).show()
+    }
 
     override fun onResume() {
-        val intentFilter = IntentFilter(Intent.ACTION_POWER_CONNECTED)
-        intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
-        intentFilter.addAction(Intent.ACTION_BATTERY_OKAY)
-        intentFilter.addAction(Intent.ACTION_BATTERY_LOW)
+        val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+//        intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+//        intentFilter.addAction(Intent.ACTION_BATTERY_OKAY)
+//        intentFilter.addAction(Intent.ACTION_BATTERY_LOW)
         this.registerReceiver(broadcastReceiver, intentFilter)
         //LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, filter)
         super.onResume()
