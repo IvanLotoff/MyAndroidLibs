@@ -1,18 +1,18 @@
 package ivan.projects.playground
 
 import android.graphics.DashPathEffect
+import android.graphics.DiscretePathEffect
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import ivan.projects.recyclerviewutils.builders.RecyclerViewBuilder
-import ivan.projects.recyclerviewutils.callbacks.createSwipeToDeleteCallback
+import ivan.projects.recyclerviewutils.builders.RecyclerViewSimpleBuilder
 import ivan.projects.recyclerviewutils.callbacks.createSwipeToDeleteCallbackWithSnackBar
 import ivan.projects.recyclerviewutils.itemdecorations.SimpleItemDecoration
 import ivan.projects.recyclerviewutils.listeners.OnRecyclerItemTouched
@@ -68,26 +68,47 @@ class MainActivity : AppCompatActivity() {
 //              dto.nameTextView?.text = person.name
 //            }
 //        )
-        val adapter = RecyclerViewBuilder.build<Person,Dto> {
-            dto = Dto(null, null)
+//        val adapter = RecyclerViewBuilder.build<Person,Dto> {
+//            items = people
+//            layoutRes = R.layout.item_person
+//            onBindViewHolderWithDTO = {
+//              _: View, person : Person, dto : Dto ->
+//              dto.phoneTextView?.text = person.phone
+//              dto.nameTextView?.text = person.name
+//            }
+//            onInitViewHolder = {
+//               view : View ->
+//                Dto(
+//                    view.findViewById<TextView>(R.id.name_text_view),
+//                    view.findViewById<TextView>(R.id.phone_text_view)
+//                )
+//            }
+//        }
+        val adapter = RecyclerViewSimpleBuilder<Person, Dto>().apply {
             items = people
-            layoutRes = R.layout.item_person
-            onBindViewHolderWithDTO = {
+            view2Dto = {
+                    view : View ->
+                Dto(
+                    view.findViewById<TextView>(R.id.name_text_view),
+                    view.findViewById<TextView>(R.id.phone_text_view)
+                )
+            }
+            onBind = {
               _: View, person : Person, dto : Dto ->
               dto.phoneTextView?.text = person.phone
               dto.nameTextView?.text = person.name
             }
-            onInitViewHolder = {
-               view : View ->
-                val name = view.findViewById<TextView>(R.id.name_text_view)
-                val phone = view.findViewById<TextView>(R.id.phone_text_view)
-                val button = view.findViewById<Button>(R.id.check_button)
-                button.setOnClickListener {
-                    Toast.makeText(this@MainActivity, name.text, Toast.LENGTH_SHORT).show()
+            layoutId = R.layout.item_person
+            diffUtilCallback = object : DiffUtil.ItemCallback<Person>(){
+                override fun areItemsTheSame(oldItem: Person, newItem: Person): Boolean {
+                    return oldItem == newItem
                 }
-                Dto(name, phone)
+                override fun areContentsTheSame(oldItem: Person, newItem: Person): Boolean {
+                    return oldItem == newItem
+                }
             }
-        }
+        }.build()
+
         recyclerView.adapter = adapter
 
         val v = findViewById<CoordinatorLayout>(R.id.main_layout)
@@ -100,33 +121,24 @@ class MainActivity : AppCompatActivity() {
             )
         }.build(recyclerView)
 
-        recyclerView.addOnItemTouchListener(object : OnRecyclerItemTouched() {
-            override fun onItemClick(
-                recyclerView: RecyclerView?,
-                holder: RecyclerView.ViewHolder
-            ) {
-                Toast.makeText(this@MainActivity, "onItemClicked ${holder.adapterPosition}", Toast.LENGTH_SHORT).show()
+        recyclerView.addOnItemTouchListener(OnRecyclerItemTouched().apply {
+            onItemClicked = {
+                _, holder->
+                Log.d("CheckTag", "onItemClicked: ${holder.adapterPosition}")
             }
-
-            override fun onItemLongClick(
-                recyclerView: RecyclerView?,
-                holder: RecyclerView.ViewHolder
-            ) {
-                Toast.makeText(this@MainActivity, "onLongClicked ${holder.adapterPosition}", Toast.LENGTH_SHORT).show()
+            onItemDoubleTap = {
+                    _, holder->
+                Log.d("CheckTag", "onItemDoubleTap: ${holder.adapterPosition}")
             }
-
-            override fun onItemDoubleTap(
-                recyclerView: RecyclerView?,
-                holder: RecyclerView.ViewHolder
-            ) {
-                Toast.makeText(this@MainActivity, "onDoubleTap ${holder.adapterPosition}", Toast.LENGTH_SHORT).show()
-            }
-
-
+//            onItemLongClick = {
+//                    _, holder->
+//                Log.d("CheckTag", "onItemLongClicked: ${holder.adapterPosition}")
+//            }
         })
 
         recyclerView.addItemDecoration(SimpleItemDecoration().apply {
-            pathEffect = DashPathEffect(floatArrayOf(15f,15f,15f,15f),5f)
+            //pathEffect = DashPathEffect(floatArrayOf(15f,15f,15f,15f),5f)
+            pathEffect = DiscretePathEffect(5f,5f)
         })
         val defaultItemAnimator = DefaultItemAnimator()
         defaultItemAnimator.removeDuration = 200

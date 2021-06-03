@@ -11,7 +11,7 @@ import android.view.GestureDetector.SimpleOnGestureListener
 import androidx.recyclerview.widget.RecyclerView.SimpleOnItemTouchListener
 
 
-abstract class OnRecyclerItemTouched : SimpleOnItemTouchListener() {
+class OnRecyclerItemTouched : SimpleOnItemTouchListener() {
     private var mGestureDetector: GestureDetector? = null
     override fun onInterceptTouchEvent(recyclerView: RecyclerView, e: MotionEvent): Boolean {
         if (mGestureDetector == null) {
@@ -21,7 +21,7 @@ abstract class OnRecyclerItemTouched : SimpleOnItemTouchListener() {
                         val childView = recyclerView.findChildViewUnder(e.x, e.y)
                         if (childView != null) {
                             val holder = recyclerView.getChildViewHolder(childView)
-                            onItemClick(recyclerView, holder)
+                            onItemClicked?.let { it(recyclerView, holder) }
                         }
                         return true
                     }
@@ -30,7 +30,7 @@ abstract class OnRecyclerItemTouched : SimpleOnItemTouchListener() {
                         val childView = recyclerView.findChildViewUnder(e.x, e.y)
                         if (childView != null) {
                             val holder = recyclerView.getChildViewHolder(childView)
-                            onItemLongClick(recyclerView, holder)
+                            onItemLongClick?.let { it(recyclerView, holder) }
                         }
                     }
 
@@ -39,7 +39,7 @@ abstract class OnRecyclerItemTouched : SimpleOnItemTouchListener() {
                         val childView = recyclerView.findChildViewUnder(e.x, e.y)
                         if(childView != null){
                            val holder = recyclerView.getChildViewHolder(childView)
-                           onItemDoubleTap(recyclerView, holder)
+                            onItemDoubleTap?.let { it(recyclerView, holder) }
                         }
                         return true
                     }
@@ -48,8 +48,11 @@ abstract class OnRecyclerItemTouched : SimpleOnItemTouchListener() {
         mGestureDetector!!.onTouchEvent(e)
         return false
     }
+    var onItemClicked : ((RecyclerView?, RecyclerView.ViewHolder)->Unit)? = null
+    var onItemLongClick : ((RecyclerView?, RecyclerView.ViewHolder)->Unit)? = null
+    var onItemDoubleTap : ((RecyclerView?, RecyclerView.ViewHolder)->Unit)? = null
 
-    abstract fun onItemClick(recyclerView: RecyclerView?, holder : RecyclerView.ViewHolder)
-    abstract fun onItemLongClick(recyclerView: RecyclerView?, holder : RecyclerView.ViewHolder)
-    abstract fun onItemDoubleTap(recyclerView: RecyclerView?, holder : RecyclerView.ViewHolder)
+    //abstract fun onItemClick(recyclerView: RecyclerView?, holder : RecyclerView.ViewHolder)
+    //abstract fun onItemLongClick(recyclerView: RecyclerView?, holder : RecyclerView.ViewHolder)
+    //abstract fun onItemDoubleTap(recyclerView: RecyclerView?, holder : RecyclerView.ViewHolder)
 }

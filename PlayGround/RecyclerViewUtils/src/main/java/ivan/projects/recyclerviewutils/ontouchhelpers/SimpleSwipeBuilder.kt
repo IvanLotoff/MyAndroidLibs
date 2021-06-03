@@ -16,23 +16,12 @@ class SimpleSwipeBuilder {
      */
     var leftSwipe = false
 
-    /**
-     * Is up swipe enabled
-     */
-    var upSwipe = false
-
-    /**
-     * is down swipe enabled
-     */
-    var downSwipe = false
     var onSwipe: ((RecyclerView.ViewHolder, Int) -> Unit)? = null
 
     fun build(rec : RecyclerView){
         val obj = object : ItemTouchHelper.SimpleCallback(0,
             ItemTouchHelper.RIGHT * rightSwipe.toInt() or
-                    ItemTouchHelper.LEFT * leftSwipe.toInt() or
-                    ItemTouchHelper.UP * upSwipe.toInt() or
-                    ItemTouchHelper.DOWN * downSwipe.toInt()) {
+                    ItemTouchHelper.LEFT * leftSwipe.toInt()) {
 
             override fun onMove(
                 recyclerView: RecyclerView,
