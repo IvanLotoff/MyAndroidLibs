@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/broadcastReceiverUtils" />
             <option value="$PROJECT_DIR$/expandableLayout" />
+            <option value="$PROJECT_DIR$/networkUtils" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
